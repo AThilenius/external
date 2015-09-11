@@ -4,15 +4,19 @@
 #ifndef EXTERNAL_VANGUARD_TEST_CASE_H_
 #define EXTERNAL_VANGUARD_TEST_CASE_H_
 
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+#include "json.h"
 #include "memory_monitor.h"
 
 namespace thilenius {
 namespace external {
 namespace vanguard {
+
+class Suite;
 
 // Mirrors /anvil/anvil.thrift::TestCase
 class TestCase {
@@ -23,22 +27,34 @@ class TestCase {
     bool did_pass;
     std::string name;
     std::string assert_message;
+
+    // Serializes a test to Json
+    ::nlohmann::json ToJson() const;
+
+    // Deserializes a test from Json. Returns a blank test case on error.
+    static Test FromJson(const ::nlohmann::json& json);
   };
 
   // Default initialization
-  TestCase();
-
-  // Called just before the test code is run, allowing things like memory
-  // monitors to be attached on a per-test bases
-  void BeginRun();
-
-  // Called after a full test run. Allows things like memory monitors to be
-  // detached and resolves the TestCase values from children tests
-  void EndRun();
+  explicit TestCase(std::function<void(Suite*, TestCase*)> suite_function);
 
   // Asset a single test (called from a test in a suite)
   void ExpectTrue(bool value, const std::string& name,
                   const std::string& assert_message);
+
+  // Serializes a test case to Json
+  ::nlohmann::json ToJson() const;
+
+  // Deserializes a test case from Json. Returns a blank test case on error.
+  static TestCase FromJson(const ::nlohmann::json& json);
+
+  // Runs the test case in a separate process space, using JSON over stderr for
+  // communication. Returns a new test case object is successful or the same
+  // object if a run failed.
+  TestCase RunProtected();
+
+  // Crunches the numbers for things like points_earned and did_pass
+  void ProcessData();
 
   // Mirros fields /anvil/anvil.thrift::TestCase
   bool did_pass;
@@ -52,10 +68,20 @@ class TestCase {
   int min_memory;
   int max_memory;
   bool leak_check;
-  bool sig_seg_v_registered;
+  bool std_exception_present;
   bool timeout_registered;
-  std::string exception_registered;
+  int termination_signal;
   MemoryMonitor memory_monitor;
+
+  // Not captured during serialization
+  int timeout_ms;
+
+ private:
+  // Runs the test case, writes results to stderr (in json) and exits the
+  // current assembly
+  void RunTestCaseAndExit();
+
+  const std::function<void(Suite*, TestCase*)> suite_function_;
 };
 
 }  // namespace vanguard

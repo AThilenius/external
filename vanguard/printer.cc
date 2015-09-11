@@ -6,20 +6,9 @@
 #include <iomanip>
 #include <iostream>
 #include <math.h>
-
-namespace thilenius {
-namespace external {
-namespace vanguard {
-namespace {
-
-bool use_colors_ = true;
-
-enum ConsoleColor { White, Red, Yellow, Green, Blue };
+#include <signal.h>
 
 std::ostream& operator<<(std::ostream& stream, ConsoleColor color) {
-  if (!use_colors_) {
-    return stream;
-  }
   switch (color) {
     case White: {
       std::cout << "\033[0m";
@@ -44,6 +33,21 @@ std::ostream& operator<<(std::ostream& stream, ConsoleColor color) {
   }
   return stream;
 }
+
+namespace thilenius {
+namespace external {
+namespace vanguard {
+namespace {
+
+void WriteError(const std::string name, std::vector<std::string> lines,
+                std::ostream* stream) {
+  *stream << Blue << "|   |   " << Red << "- " << name << std::endl;
+  for (const auto& line : lines) {
+    *stream << Blue << "|   |   |   " << Yellow << line << std::endl;
+  }
+}
+
+bool use_colors_ = true;
 
 }  // namespace
 
@@ -126,24 +130,24 @@ void Printer::WriteTestCaseResults(const TestCase& test_case,
   } else {
     if (test_case.min_memory != -1 &&
         test_case.min_memory > test_case.memory_monitor.ClosedSize()) {
-      *stream << Blue << "|   |   " << Red
-              << "- Not enough heap memory allocated!" << std::endl;
-      *stream << Blue << "|   |   |   " << Yellow
-              << "Minimum required heap allocations: " << test_case.min_memory
-              << " Bytes" << std::endl;
-      *stream << Blue << "|   |   |   " << Yellow << "Total Heap Allocations: "
-              << test_case.memory_monitor.ClosedSize() << " Bytes" << std::endl;
+      WriteError("Not enough head memory allocated!",
+                 {"Minimum required heap allocations: " +
+                      std::to_string(test_case.min_memory) + " Bytes",
+                  "Total Heap Allocations: " +
+                      std::to_string(test_case.memory_monitor.ClosedSize()) +
+                      " Bytes"},
+                 stream);
     }
     // Max check
     if (test_case.max_memory != -1 &&
         test_case.max_memory < test_case.memory_monitor.ClosedSize()) {
-      *stream << Blue << "|   |   " << Red
-              << "- Too much heap memory allocated!" << std::endl;
-      *stream << Blue << "|   |   |   " << Yellow
-              << "Maximum allowed heap allocations: " << test_case.max_memory
-              << " Bytes" << std::endl;
-      *stream << Blue << "|   |   |   " << Yellow << "Total heap allocations: "
-              << test_case.memory_monitor.ClosedSize() << " Bytes" << std::endl;
+      WriteError("Too much heap memory allocated!",
+                 {"Maximum allowed heap allocations: " +
+                      std::to_string(test_case.max_memory) + " Bytes",
+                  "Total heap allocations: " +
+                      std::to_string(test_case.memory_monitor.ClosedSize()) +
+                      " Bytes"},
+                 stream);
     }
     // Leak check
     if (test_case.leak_check &&
@@ -158,22 +162,47 @@ void Printer::WriteTestCaseResults(const TestCase& test_case,
                 << ". line: " << allocation.second.line << std::endl;
       }
     }
-    if (test_case.sig_seg_v_registered) {
-      *stream << Blue << "|   |   " << Red << "- Segmentation Fault!"
-              << std::endl;
-      *stream << Blue << "|   |   |   " << Yellow
-              << "You are probably trying to dereference a null pointer."
-              << std::endl;
+    switch (test_case.termination_signal) {
+      case SIGINT:
+        WriteError("SIGINT Interrupt!",
+                   {"Did you press ctrl-c? Don't do that if you did."}, stream);
+        break;
+      case SIGQUIT:
+        WriteError("SIGQUIT Quit!", {"Not sure why, sorry."}, stream);
+        break;
+      case SIGILL:
+        WriteError("SIGILL Illegal Instruction!",
+                   {"The test executed an illegal CPU instruction."}, stream);
+        break;
+      case SIGABRT:
+        WriteError("SIGABRT Abort!", {"Abort was called, not good news."},
+                   stream);
+        break;
+      case SIGSEGV:
+        WriteError("SIGSEGV Segmentation Fault!",
+                   {"You are probably trying to dereference a null or invalid "
+                    "pointer."},
+                   stream);
+        break;
+      case SIGFPE:
+        WriteError("SIGFPE Floating-Point Exception!",
+                   {"You are probably trying to divide something by zero."},
+                   stream);
+        break;
+      case SIGBUS:
+        WriteError("SIGBUS Bus Error!", {"Not sure why, sorry."}, stream);
+        break;
+      case EXIT_FAILURE:
+        WriteError(
+            "Hard Termination",
+            {"The test crashed spectacularly. Could be a stack overflow?"},
+            stream);
     }
     if (test_case.timeout_registered) {
-      *stream << Blue << "|   |   " << Red << "- Timeout!" << std::endl;
-      *stream << Blue << "|   |   |   " << Yellow
-              << "You probably have an infinite loop." << std::endl;
+      WriteError("Timeout!", {"You probably have an infinite loop."}, stream);
     }
-    if (test_case.exception_registered.length() != 0) {
-      *stream << Blue << "|   |   " << Red << "- Exception" << std::endl;
-      *stream << Blue << "|   |   |   " << Yellow
-              << test_case.exception_registered << std::endl;
+    if (test_case.std_exception_present) {
+      WriteError("Exception!", {"A fatal exception was throw"}, stream);
     }
     *stream << Blue << "|   " << Red << "Failed!" << White << std::endl;
   }

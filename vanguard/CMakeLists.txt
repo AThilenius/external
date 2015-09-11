@@ -11,8 +11,8 @@ add_library (
   /root/thilenius/external/vanguard/main.cc
   /root/thilenius/external/vanguard/memory_monitor.cc
   /root/thilenius/external/vanguard/printer.cc
+  /root/thilenius/external/vanguard/process.cc
   /root/thilenius/external/vanguard/suite.cc
-  /root/thilenius/external/vanguard/suite_runner.cc
   /root/thilenius/external/vanguard/test_case.cc
 )
 

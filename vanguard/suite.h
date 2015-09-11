@@ -8,16 +8,18 @@
 #include <string>
 #include <vector>
 
+#include "json.h"
 #include "test_case.h"
 
-#define SUITE(suite_name) void suite_name()
+#define SUITE(suite_name)                                        \
+  void suite_name(::thilenius::external::vanguard::Suite* suite, \
+                  ::thilenius::external::vanguard::TestCase* test_case)
 #define TEST(test_name, points_possible, points_denominator)                   \
-  if (::thilenius::external::vanguard::Suite::ActiveSuite().ActivateTestPhase( \
-          test_name, points_possible, points_denominator))
-#define EXPECT_TRUE(val, name, assert_message)          \
-  ::thilenius::external::vanguard::Suite::ActiveSuite() \
-      .ActiveTestCase()                                 \
-      .ExpectTrue(val, name, assert_message)
+  if ((suite &&                                                                \
+       suite->RegisterTest(test_name, points_possible, points_denominator)) || \
+      (test_case && test_case->name == test_name))
+#define EXPECT_TRUE(val, name, assert_message) \
+  test_case->ExpectTrue(val, name, assert_message)
 
 namespace thilenius {
 namespace external {
@@ -26,36 +28,26 @@ namespace vanguard {
 class Suite {
  public:
   // The type of the suite lambda
-  typedef std::function<void()> SuiteFunction;
+  typedef std::function<void(Suite*, TestCase*)> SuiteFunction;
 
   // Creates a suite from an anonymous lambda and a name
   Suite(const std::string& suite_name, const SuiteFunction& suite_function);
 
-  // Returns the currently running suite (only valid to call from within a suite
-  // function)
-  static Suite& ActiveSuite();
+  // Registers a new tests with the suite, always returns false
+  bool RegisterTest(const std::string& test_name, int points_possible,
+                    int points_denominator);
 
-  // Returns the currently active test case (only valid to call from within a
-  // test function)
-  TestCase& ActiveTestCase();
+  // Runs all test cases in their own children processes
+  void RunAllTestCasesProtected();
 
-  // Used by a suite function to run a single stage at a time, giving the suite
-  // control over scope. Because the behaviour of this changes, this function is
-  // actually just a pass-through to a closure.
-  bool ActivateTestPhase(const std::string& test_name, int points_possible,
-                         int points_denominator);
+  // Serialize a Suite to Json
+  ::nlohmann::json ToJson() const;
 
-  // Runs the suite, from the last run test case index + 1. This should be
-  // called at the end of a protective rack, on a separate thread
-  void RunOrRerunSuite();
+  // Deserialize a suite from Json. Returns a blank suite on failure
+  static Suite FromJson(const ::nlohmann::json& json);
 
-  // The name of the test suite
-  const std::string suite_name;
-
-  // All test cases, in order of execution
+  std::string suite_name;
   std::vector<TestCase> test_cases;
-
-  // Valid after RunOrRerunSuite has been called and returned
   bool did_pass;
   int points_denominator;
   int points_earned;
@@ -63,8 +55,6 @@ class Suite {
 
  private:
   const SuiteFunction suite_function_;
-  int active_test_index_;
-  std::function<bool(const std::string&, int, int)> active_test_closure_;
 };
 
 }  // namespace vanguard

@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "json.h"
+
 // Overriding the new operator
 void* operator new(size_t size);
 
@@ -33,6 +35,13 @@ class MemoryMonitor {
     size_t size;
     std::string file;
     size_t line;
+
+    // Serializes a Memory Allocation to json
+    ::nlohmann::json ToJson() const;
+
+    // Deserializes a Memory Allocation from json. Returns an empty allocation
+    // on error.
+    static MemoryAllocation FromJson(const ::nlohmann::json& json);
   };
 
   // Clears and activates this memory monitor (deactivating any other active
@@ -47,6 +56,13 @@ class MemoryMonitor {
 
   // The size of all memory allocated and freed
   size_t ClosedSize() const;
+
+  // Serializes a Memory Monitor to json
+  ::nlohmann::json ToJson() const;
+
+  // Deserializes a Memory Monitor from json. Returns an empty allocation
+  // on error.
+  static MemoryMonitor FromJson(const ::nlohmann::json& json);
 
   // Outstanding allocation, new called without a delete
   std::unordered_map<void*, MemoryAllocation> outstanding_allocations;

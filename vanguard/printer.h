@@ -9,6 +9,10 @@
 #include "suite.h"
 #include "test_case.h"
 
+// Used for printing colored output
+enum ConsoleColor { White, Red, Yellow, Green, Blue };
+std::ostream& operator<<(std::ostream& stream, ConsoleColor color);
+
 namespace thilenius {
 namespace external {
 namespace vanguard {
