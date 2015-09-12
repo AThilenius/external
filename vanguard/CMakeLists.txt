@@ -8,12 +8,11 @@ set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_library (
   vanguard
-  /root/thilenius/external/vanguard/main.cc
-  /root/thilenius/external/vanguard/memory_monitor.cc
-  /root/thilenius/external/vanguard/printer.cc
-  /root/thilenius/external/vanguard/process.cc
-  /root/thilenius/external/vanguard/suite.cc
-  /root/thilenius/external/vanguard/test_case.cc
+  memory_monitor.cc
+  printer.cc
+  process.cc
+  suite.cc
+  test_case.cc
 )
 
 target_link_libraries (
@@ -23,7 +22,7 @@ target_link_libraries (
 
 add_executable (
   vanguard_test
-  /root/thilenius/external/vanguard/main.cc
+  vanguard_test.cc
 )
 
 target_link_libraries (

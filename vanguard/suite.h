@@ -20,6 +20,7 @@
       (test_case && test_case->name == test_name))
 #define EXPECT_TRUE(val, name, assert_message) \
   test_case->ExpectTrue(val, name, assert_message)
+#define ACTIVE_TEST_CASE (*(test_case))
 
 namespace thilenius {
 namespace external {
