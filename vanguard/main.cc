@@ -45,9 +45,14 @@ SUITE(SuiteOne) {
 
   TEST("Abort", 5, 5) { abort(); }
 
-  // TEST("Unknwon Exception", 5, 5) {
-  // throw "Unknown Exception Type";
-  //}
+  TEST("Unknwon Exception", 5, 5) { throw "Unknown Exception Type"; }
+
+  TEST("User output", 10, 10) {
+    std::cout << "This, my friend" << std::endl;
+    std::cout << "Is some user output, written to std::cout" << std::endl;
+    std::cout << "It is captured from the child process" << std::endl;
+    std::cout << "Cool shit! AMIRIGHT!" << std::endl;
+  }
 
   // TEST("Memory Leak Check Pass", 5, 5) {
   // Suite::ActiveSuite().ActiveTestCase().leak_check = true;
@@ -116,6 +121,7 @@ int main(int argc, char* argv[]) {
   Suite suite("Test Suite", SuiteOne);
   suite.RunAllTestCasesProtected();
   Printer printer;
+  printer.WriteStdCout(suite, &std::cout);
   printer.WriteSuiteResults(suite, &std::cout);
   printer.WriteSuiteReportCard(suite, &std::cout);
 }

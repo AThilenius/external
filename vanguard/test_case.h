@@ -72,6 +72,7 @@ class TestCase {
   bool timeout_registered;
   int termination_signal;
   MemoryMonitor memory_monitor;
+  std::string stdcout;
 
   // Not captured during serialization
   int timeout_ms;

@@ -22,6 +22,9 @@ class Printer {
   // Create a default colorized printer
   Printer();
 
+  // Writed all cout data from each test case
+  void WriteStdCout(const Suite& suite, std::ostream* stream);
+
   // Write a suite results out to stream
   void WriteSuiteResults(const Suite& suite, std::ostream* stream);
 

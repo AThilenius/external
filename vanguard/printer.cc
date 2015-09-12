@@ -53,6 +53,45 @@ bool use_colors_ = true;
 
 Printer::Printer() : colorized(true) {}
 
+void Printer::WriteStdCout(const Suite& suite, std::ostream* stream) {
+  use_colors_ = colorized;
+  *stream << std::endl;
+  bool has_any_output = false;
+  for (const auto& test_case : suite.test_cases) {
+    if (test_case.stdcout.length() != 0) {
+      has_any_output = true;
+      break;
+    }
+  }
+  if (!has_any_output) {
+    *stream << Blue << "Standard Out: None" << std::endl;
+  } else {
+    int line_count_total = 0;
+    int test_count = 0;
+    *stream << Blue << "Standard Out:" << std::endl;
+    *stream << Blue << "|" << std::endl;
+    for (const auto& test_case : suite.test_cases) {
+      if (test_case.stdcout.length() != 0) {
+        test_count++;
+        *stream << Blue << "|   Test: " << test_case.name << White << std::endl;
+        std::stringstream sstream(test_case.stdcout);
+        std::string line;
+        int line_count = 0;
+        while (std::getline(sstream, line)) {
+          *stream << Blue << "|   |   " << White << line << std::endl;
+          line_count++;
+          line_count_total++;
+        }
+        *stream << Blue << "|   Displaying " << line_count << " lines" << White
+                << std::endl;
+        *stream << Blue << "|" << White << std::endl;
+      }
+    }
+    *stream << Blue << "Displaying " << line_count_total << " total lines from "
+            << test_count << " tests" << White << std::endl;
+  }
+}
+
 void Printer::WriteSuiteResults(const Suite& suite, std::ostream* stream) {
   use_colors_ = colorized;
   *stream << std::endl;

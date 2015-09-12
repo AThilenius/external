@@ -113,7 +113,8 @@ void TestCase::ExpectTrue(bool value, const std::string& name,
                            {"std_exception_present", std_exception_present},
                            {"timeout_registered", timeout_registered},
                            {"termination_signal", termination_signal},
-                           {"memory_monitor", memory_monitor.ToJson()}};
+                           {"memory_monitor", memory_monitor.ToJson()},
+                           {"stdcout", stdcout}};
   for (const auto& test : tests) {
     json["tests"].push_back(test.ToJson());
   }
@@ -138,6 +139,7 @@ TestCase TestCase::FromJson(const ::nlohmann::json& json) {
     test_case.timeout_registered = json["timeout_registered"].get<bool>();
     test_case.termination_signal = json["termination_signal"].get<int>();
     test_case.memory_monitor = MemoryMonitor::FromJson(json["memory_monitor"]);
+    test_case.stdcout = json["stdcout"].get<std::string>();
   } catch (...) {
   }
   return std::move(test_case);
@@ -219,8 +221,11 @@ TestCase TestCase::RunProtected() {
       if (json["name"].get<std::string>() != name) {
         throw;
       }
+      TestCase test_case = TestCase::FromJson(json);
+      // Also parse out stdcout
+      test_case.stdcout = child.GetOut();
       // Looks like it worked
-      return std::move(TestCase::FromJson(json));
+      return std::move(test_case);
     }
   } catch (...) {
     // Fatal, unknown crash
