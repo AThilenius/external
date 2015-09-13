@@ -31,6 +31,7 @@ set_target_properties(libvanguard PROPERTIES
 #===  LINKED LIST  =============================================================
 add_executable (
   linked_list
+  linked_list.cc
   linked_list_test.cc
 )
 add_dependencies(linked_list vanguard)
