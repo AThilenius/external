@@ -73,7 +73,7 @@ SUITE(LinkedListTestSuite) {
   TEST("Head set to nullptr", 5, 5) {
     // non-null head memory location so the test isn't flaky
     LinkedList linked_list;
-    linked_list.head = nullptr;
+    linked_list.head = (LinkedListNode*) -1;
     linked_list = LinkedList();
     EXPECT_TRUE(
         linked_list.head == nullptr, "Head should be nullptr",
@@ -174,7 +174,7 @@ SUITE(LinkedListTestSuite) {
                 "didn't return 42");
   }
 
-  TEST("Remote At Index", 20, 20) {
+  TEST("Remove At Index", 20, 20) {
     ACTIVE_TEST_CASE.leak_check = true;
     LinkedList linked_list = CreateLinkedList({-42, -1, 0, 1, 42});
     bool could_remove = linked_list.RemoveAtIndex(0);

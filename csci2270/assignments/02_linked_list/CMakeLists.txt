@@ -10,7 +10,7 @@ include(ExternalProject)
 #===  VANGAURD 0.1.0  ==========================================================
 ExternalProject_Add(
     vanguard
-    URL https://s3-us-west-1.amazonaws.com/thilenius.misc/vanguard-0.1.0.zip
+    URL https://s3-us-west-1.amazonaws.com/thilenius.misc/vanguard-0.1.1.zip
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/vanguard
     # Don't install
     INSTALL_COMMAND ""

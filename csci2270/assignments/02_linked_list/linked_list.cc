@@ -63,7 +63,11 @@ int LinkedList::Size() { return -1; }
 // the linked list. This is one of the more tricky ones. You'll need to talk the
 // list until you find the index you want to insert at (maybe one before that,
 // hint hint) and 'wire' in the new element. Whiteboard this one out!!
-bool LinkedList::InsertAtIndex(int value, int index) { return true; }
+bool LinkedList::InsertAtIndex(int value, int index) {
+  std::cout << "Don't forget, you can use cout to debug things! The output "
+               "apears ABOVE the test output" << std::endl;
+  return true;
+}
 
 // Adds an element to the front of the linked list. If this one takes you more
 // than one or two lines of code then you clearly didn't read the tips above :p
