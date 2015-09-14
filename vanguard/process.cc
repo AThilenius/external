@@ -9,7 +9,6 @@
 #include <sstream>
 #include <sys/wait.h>
 #include <thread>
-#include <unistd.h>
 
 #include "printer.h"
 

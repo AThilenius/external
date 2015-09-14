@@ -7,6 +7,7 @@
 #include <chrono>
 #include <functional>
 #include <string>
+#include <unistd.h>
 
 namespace thilenius {
 namespace external {
