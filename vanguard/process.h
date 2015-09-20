@@ -8,6 +8,7 @@
 #include <functional>
 #include <string>
 #include <unistd.h>
+#include <vector>
 
 namespace thilenius {
 namespace external {
@@ -19,6 +20,9 @@ namespace vanguard {
 class Process {
  public:
   static Process FromFork(std::function<int()> child_task);
+
+  static Process FromExecv(const std::string& full_path,
+                           const std::vector<std::string> args);
 
   bool Execute();
 

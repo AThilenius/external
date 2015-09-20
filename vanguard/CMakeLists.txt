@@ -13,6 +13,7 @@ add_library (
   process.cc
   suite.cc
   test_case.cc
+  vanguard.cc
 )
 
 target_link_libraries (

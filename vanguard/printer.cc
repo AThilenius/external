@@ -8,7 +8,12 @@
 #include <math.h>
 #include <signal.h>
 
+
+bool use_colors_ = true;
 std::ostream& operator<<(std::ostream& stream, ConsoleColor color) {
+  if (!use_colors_) {
+    return stream;
+  }
   switch (color) {
     case White: {
       std::cout << "\033[0m";
@@ -46,8 +51,6 @@ void WriteError(const std::string name, std::vector<std::string> lines,
     *stream << Blue << "|   |   |   " << Yellow << line << std::endl;
   }
 }
-
-bool use_colors_ = true;
 
 }  // namespace
 
@@ -108,6 +111,7 @@ void Printer::WriteSuiteResults(const Suite& suite, std::ostream* stream) {
 }
 
 void Printer::WriteSuiteReportCard(const Suite& suite, std::ostream* stream) {
+  use_colors_ = colorized;
   if (suite.points_possible > 0) {
     *stream << White << std::endl;
     *stream << Blue << "Points: ";

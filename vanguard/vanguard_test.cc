@@ -4,11 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "printer.h"
-#include "suite.h"
-
-using ::thilenius::external::vanguard::Suite;
-using ::thilenius::external::vanguard::TestCase;
+#include "vanguard.h"
 
 void OverflowStack() { OverflowStack(); }
 
@@ -118,14 +114,9 @@ SUITE(SuiteOne) {
   }
 }
 
-using ::thilenius::external::vanguard::Printer;
-using ::thilenius::external::vanguard::Suite;
+using ::thilenius::external::vanguard::Vanguard;
 
 int main(int argc, char* argv[]) {
-  Suite suite("Test Suite", SuiteOne);
-  suite.RunAllTestCasesProtected();
-  Printer printer;
-  printer.WriteStdCout(suite, &std::cout);
-  printer.WriteSuiteResults(suite, &std::cout);
-  printer.WriteSuiteReportCard(suite, &std::cout);
+  Vanguard vanguard (argc, argv);
+  vanguard.RunSuite(SuiteOne, "Test Suite");
 }

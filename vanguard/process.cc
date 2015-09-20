@@ -9,6 +9,7 @@
 #include <sstream>
 #include <sys/wait.h>
 #include <thread>
+#include <unistd.h>
 
 #include "printer.h"
 
@@ -28,6 +29,23 @@ Process Process::FromFork(std::function<int()> child_task) {
   process.child_task_ = child_task;
   process.pid_ = 0;
   return std::move(process);
+}
+
+Process Process::FromExecv(const std::string& full_path,
+                           const std::vector<std::string> args) {
+  // Must be a vector of char* because execv is a crappy C call. I hate C
+  std::function<int()> child_task = [full_path, args]() -> int {
+    std::vector<char*> final_args(args.size() + 2);
+    final_args[0] = const_cast<char*>(full_path.c_str());
+    for (int i = 0; i != args.size(); ++i) {
+      final_args[i + 1] = const_cast<char*>(&args[i][0]);
+    }
+    // Null terminated
+    final_args[args.size() + 1] = 0;
+    // Exec it
+    return execv(full_path.c_str(), final_args.data());
+  };
+  return std::move(Process::FromFork(child_task));
 }
 
 bool Process::Execute() {
