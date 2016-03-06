@@ -55,7 +55,7 @@ Vanguard::Vanguard(int argc, char* argv[])
     execution_mode_ = ExecutionMode::HARNESSED_CHILD;
   }
   // Let forced fall-back override harnessing
-  if (flags_.find("no_anvil") != flags_.end()) {
+  if (flags_.find("offline") != flags_.end()) {
     execution_mode_ = ExecutionMode::FORCED_DIRECT;
   }
   if (flags_.find("no_color") != flags_.end()) {
@@ -98,8 +98,7 @@ void Vanguard::RunSuite(const Suite::SuiteFunction& suite_function,
       printer_.WriteSuiteResults(suite, output_stream_);
       printer_.WriteSuiteReportCard(suite, output_stream_);
       std::cout
-          << Yellow << "Vanguard was run with the --no_anvil flag, "
-                       "meaning the tests were run off-line!" << std::endl
+          << Yellow << "Vanguard was run with the --offline flag" << std::endl
           << "Nothing has been submitted for grading to Crucible or Chronicle."
           << White << std::endl;
       break;
